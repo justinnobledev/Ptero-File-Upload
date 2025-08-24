@@ -1,0 +1,6 @@
+venv
+*.json
+*.dll
+*.pdb
+.DS_STORE
+*.code-workspace
