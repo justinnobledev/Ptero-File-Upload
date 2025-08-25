@@ -13,6 +13,8 @@ DEBUG = False
 
 valid_eggs_to_sync = ["KitsuneLab CS2 Egg @ K4ryuu"]
 
+exclude_servers = ["1v1"]
+
 @dataclass
 class Server:
     UUID: str
@@ -120,6 +122,9 @@ async def build_server_list() -> List[Server]:
                 egg_id = attrs["egg"]
                 nest_id = attrs["nest"]
                 name = attrs['name']
+                for excluded in exclude_servers:
+                    if excluded in name:
+                        continue
                 
                 if DEBUG and not ('Dev' in name):
                     continue
