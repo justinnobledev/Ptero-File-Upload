@@ -11,7 +11,7 @@ API_KEY = ""
 
 DEBUG = False
 
-valid_eggs_to_sync = ["KitsuneLab CS2 Egg @ K4ryuu"]
+valid_images = ["docker.io/sples1/k4ryuu-cs2:latest"]
 
 exclude_servers = ["1v1"]
 
@@ -146,12 +146,11 @@ async def build_server_list() -> List[Server]:
     
     servers:List[Server] = []
     async with ClientSession() as session:
-        data = await fetch(session, f"{PANEL_URL}/api/application/servers", headers)
+        data = await fetch(session, f"{PANEL_URL}/api/client", headers)
         if data:
             for server in data["data"]:
                 attrs = server["attributes"]
-                egg_id = attrs["egg"]
-                nest_id = attrs["nest"]
+                docker_image = attrs["docker_image"]
                 name = attrs['name']
                 for excluded in exclude_servers:
                     if excluded in name:
@@ -159,18 +158,8 @@ async def build_server_list() -> List[Server]:
                 
                 if DEBUG and not ('Dev' in name):
                     continue
-
-                # Step 2: Fetch egg info
-                egg_info = await fetch( session,
-                    f"{PANEL_URL}/api/application/nests/{nest_id}/eggs/{egg_id}",
-                    headers=headers
-                )
                 
-                if not egg_info:
-                    print('Failed to fetch egg')
-                    continue
-                
-                if egg_info['attributes']['name'] not in valid_eggs_to_sync:
+                if docker_image not in valid_images:
                     continue
                 
                 s = Server(
