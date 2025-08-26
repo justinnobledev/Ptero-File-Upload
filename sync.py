@@ -41,7 +41,32 @@ async def fetch(session: ClientSession, url: str, headers: Dict[str, str]) -> Op
     except ClientError as e:
         print(f"❌ Network error while fetching {url}: {e}")
         return None
-    
+
+async def folder_exists(session: ClientSession, server_id: str, path: str, directory: str) -> bool:
+    """Check if a folder exists on the server."""
+    url = f"{PANEL_URL}/api/client/servers/{server_id}/files/list"
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Accept": "Application/vnd.pterodactyl.v1+json",
+    }
+    params = {"directory": path or "/"}
+    try:
+        async with session.get(url, headers=headers, params=params) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                # data['data'] is a list of files/folders in that directory
+                # Check if a folder with the last part of the path exists
+                for item in data["data"]:
+                    if item['attributes']["name"] == directory and not item['attributes']["is_file"]:
+                        return True
+                return False
+            else:
+                print(f"⚠️ Failed to list {path}: {resp.status}")
+                return False
+    except Exception as e:
+        print(f"❌ Error checking folder {path}: {e}")
+        return False
+
 async def ensure_folders(session: ClientSession, id: str, path: str) -> bool:
     """Ensure all subfolders in 'path' exist, creating them if needed."""
     parts = path.strip("/").split("/")
@@ -61,6 +86,12 @@ async def create_folder(session: ClientSession, id: str, name: str, root: str) -
         'Accept': 'Application/vnd.pterodactyl.v1+json',
         "Content-Type": "application/json",
     }
+    
+    if await folder_exists(session, id, root, name):
+        if DEBUG:
+            print(f"📂 Folder {os.path.join(root, name)} already exists")
+        return True
+    
     payload = {"name": name, "root": root or "/"}
     async with session.post(url, headers=headers, json=payload) as resp:
         if resp.status == 204:
