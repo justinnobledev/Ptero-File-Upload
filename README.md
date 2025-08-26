@@ -30,7 +30,7 @@ PANEL_URL = "https://panel.example.com"
 API_KEY = "your_api_key_here"
 ```
 
-2. Adjust `valid_eggs_to_sync` to select which server eggs should receive uploads.
+2. Adjust `valid_images` to select which server images should receive uploads.
 
 3. Run the script:
 
@@ -41,7 +41,7 @@ python sync.py
 The script will:
 
 1. Build the list of files from `upload/`.
-2. Fetch your servers from the panel filtered by eggs.
+2. Fetch your servers from the panel filtered by images.
 3. Create necessary directories on the server.
 4. Upload all files while preserving folder structure.
 
