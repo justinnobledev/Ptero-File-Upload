@@ -178,7 +178,7 @@ def is_hidden(filepath: str) -> bool:
     """
     if sys.platform.startswith("win"):
         FILE_ATTRIBUTE_HIDDEN = 0x02
-        attrs = ctypes.windll.kernel32.GetFileAttributesW(str(filepath))
+        attrs = ctypes.windll.kernel32.GetFileAttributesW(str(filepath)) # type: ignore
         if attrs == -1:
             return False
         return bool(attrs & FILE_ATTRIBUTE_HIDDEN)
